@@ -11,7 +11,7 @@ Run the following command for train model on your own dataset:
 python train.py --dataset mnist 
 ```
 
-## Train
+## Test
 
 Run the following command for evaluation trained model on test dataset:
 ```
