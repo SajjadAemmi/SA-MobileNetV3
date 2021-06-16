@@ -1,3 +1,5 @@
+from PIL import Image
+
 import torch
 from torchvision import datasets, transforms, models
 
@@ -6,12 +8,15 @@ import config
 
 def gray2rgb(image):
     return image.repeat(3, 1, 1)
+    # rgbimg = Image.new("RGB", image.size)
+    # rgbimg.paste(image)
+    # return rgbimg
 
 
 def mnist(subset='train'):
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Lambda(gray2rgb),
-                                    transforms.Resize((224,224))
+    transform = transforms.Compose([transforms.Lambda(gray2rgb),
+                                    transforms.Resize((224,224)),
+                                    transforms.ToTensor(),
                                     # transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                     #                      std=[0.229, 0.224, 0.225]),
                                 ])

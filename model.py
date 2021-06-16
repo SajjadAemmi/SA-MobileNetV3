@@ -6,7 +6,8 @@ from torch import nn, Tensor
 from torch.nn.parameter import Parameter
 import torch.nn.functional as F
 import torch.utils.data as data
-from torchvision.models.mobilenetv2 import _make_divisible, ConvBNActivation
+
+from utils import make_divisible
 
 
 class sa_layer(nn.Module):
@@ -82,6 +83,36 @@ class SqueezeExcitation(nn.Module):
         return output
 
 
+class ConvBNActivation(nn.Sequential):
+    def __init__(
+        self,
+        in_planes: int,
+        out_planes: int,
+        kernel_size: int = 3,
+        stride: int = 1,
+        groups: int = 1,
+        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        activation_layer: Optional[Callable[..., nn.Module]] = None,
+        dilation: int = 1,
+    ) -> None:
+        padding = (kernel_size - 1) // 2 * dilation
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        if activation_layer is None:
+            activation_layer = nn.ReLU6
+        super(ConvBNReLU, self).__init__(
+            nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding, dilation=dilation, groups=groups,
+                      bias=False),
+            norm_layer(out_planes),
+            activation_layer(inplace=True)
+        )
+        self.out_channels = out_planes
+
+
+# necessary for backwards compatibility
+ConvBNReLU = ConvBNActivation
+
+
 class InvertedResidualConfig:
 
     def __init__(self, input_channels: int, kernel: int, expanded_channels: int, out_channels: int, use_se: bool,
@@ -97,7 +128,7 @@ class InvertedResidualConfig:
 
     @staticmethod
     def adjust_channels(channels: int, width_mult: float):
-        return _make_divisible(channels * width_mult, 8)
+        return make_divisible(channels * width_mult, 8)
 
 
 class InvertedResidual(nn.Module):
