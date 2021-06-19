@@ -37,14 +37,15 @@ def test():
     tic = time.time()
 
     model.eval()
-    test_acc = 0
-    for data, labels in tqdm(test_dataloader, desc="Testing"):
-        data, labels = data.to(device), labels.to(device)
-        preds = model(data)
-        test_acc += calc_acc(preds, labels)
+    with torch.no_grad():
+        test_acc = 0
+        for data, labels in tqdm(test_dataloader, desc="Testing"):
+            data, labels = data.to(device), labels.to(device)
+            preds = model(data)
+            test_acc += calc_acc(preds, labels)
 
-    acc = test_acc / len(test_dataloader)
-    print(config.BLUE, f"[Test Accuracy: {acc}]", config.RESET)
+        acc = test_acc / len(test_dataloader)
+        print(config.BLUE, f"[Test Accuracy: {acc}]", config.RESET)
 
     tac = time.time()
     print("Time Taken : ", tac - tic)

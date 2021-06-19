@@ -244,19 +244,12 @@ class MobileNetV3(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.zeros_(m.bias)
 
-    def _forward_impl(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         x = self.features(x)
-
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-
         x = self.classifier(x)
-
         return x
-
-    def forward(self, x: Tensor) -> Tensor:
-        return self._forward_impl(x)
-
 
 def _mobilenet_v3_conf(arch: str, params: Dict[str, Any]):
     # non-public config parameters
