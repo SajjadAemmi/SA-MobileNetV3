@@ -52,7 +52,7 @@ def inference():
 
     image_tensor = transform(image).unsqueeze(0).to(device)
 
-    output = F.softmax(model(image_tensor.to(device)), dim=1)
+    output = F.softmax(model(image_tensor), dim=1)
     print(config.GREEN, torch.argmax(output), config.RESET)
 
     if args.use_gradcam:
