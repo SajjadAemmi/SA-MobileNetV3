@@ -1,12 +1,9 @@
-from threading import main_thread
 import time
 import argparse
 
 import torch
-from torch import nn, Tensor
-from torch.nn.parameter import Parameter
-import torch.nn.functional as F
 from tqdm import tqdm
+from colorama import Fore
 
 from model import mobilenet_v3_large
 from utils import calc_acc
@@ -29,14 +26,12 @@ def test():
     num_classes = len(dataset_classes)
 
     device = torch.device('cuda') if torch.cuda.is_available() and args.gpu else torch.device('cpu')
-    model = mobilenet_v3_large(num_classes=num_classes)
-    model = model.to(device)
-    model.eval()
+    model = mobilenet_v3_large(num_classes=num_classes).to(device)
     model.load_state_dict(torch.load(args.weights, map_location=device), strict=False)
+    model.eval()
 
     tic = time.time()
 
-    model.eval()
     with torch.no_grad():
         test_acc = 0
         for data, labels in tqdm(test_dataloader, desc="Testing"):
@@ -45,7 +40,7 @@ def test():
             test_acc += calc_acc(preds, labels)
 
         acc = test_acc / len(test_dataloader)
-        print(config.BLUE, f"[Test Accuracy: {acc}]", config.RESET)
+        print(Fore.BLUE, f"[Test Accuracy: {acc}]", Fore.RESET)
 
     tac = time.time()
     print("Time Taken : ", tac - tic)

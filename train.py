@@ -1,12 +1,9 @@
-from threading import main_thread
 import time
 import argparse
 
 import torch
-from torch import nn, Tensor
-from torch.nn.parameter import Parameter
-import torch.nn.functional as F
 from tqdm import tqdm
+from colorama import Fore
 
 from model import mobilenet_v3_large
 from utils import calc_acc
@@ -28,18 +25,19 @@ def train():
     num_classes = len(dataset_classes)
 
     device = torch.device('cuda') if torch.cuda.is_available() and args.gpu else torch.device('cpu')
-    model = mobilenet_v3_large(num_classes=num_classes)
-    model = model.to(device)
+    model = mobilenet_v3_large(num_classes=num_classes).to(device)
 
     tic = time.time()
 
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
-    model.train(True)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+
     for epoch in range(1, config.epochs + 1):
         train_loss = 0.0
         train_acc = 0.0
+        model.train(True)
         for data, labels in tqdm(train_dataloader, desc="Training"):
             data, labels = data.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -51,25 +49,36 @@ def train():
             train_loss += loss
             train_acc += calc_acc(preds, labels)
 
-        epoch_loss = train_loss / len(train_dataloader)
-        epoch_acc = train_acc / len(train_dataloader)
+        total_loss = train_loss / len(train_dataloader)
+        total_acc = train_acc / len(train_dataloader)
+        print(Fore.GREEN,
+              f"Epoch: {epoch}",
+              f"[Train Loss: {total_loss}]",
+              f"[Train Accuracy: {total_acc}]",
+              f"[lr: {optimizer.param_groups[0]['lr']}]",
+              Fore.RESET)
 
-        print(config.GREEN, f"Epoch: {epoch} [Train Loss: {epoch_loss}] [Train Accuracy: {epoch_acc}]", config.RESET)
+        if config.val:
+            model.eval()
+            val_acc = 0
+            with torch.no_grad():
+                for data, labels in tqdm(val_dataloader, desc="Validating"):
+                    data, labels = data.to(device), labels.to(device)
+                    preds = model(data)
+                    val_acc += calc_acc(preds, labels)
 
-        val_acc = 0
-        for data, labels in tqdm(val_dataloader, desc="Validating"):
-            data, labels = data.to(device), labels.to(device)
-            preds = model(data)
-            val_acc += calc_acc(preds, labels)
+                total_acc = val_acc / len(val_dataloader)
+                print(Fore.BLUE,
+                      f"[Validation Accuracy: {total_acc}]",
+                      Fore.RESET)
 
-        acc = val_acc / len(val_dataloader)
-        print(config.BLUE, f"[Validation Accuracy: {acc}]", config.RESET)
-
+        scheduler.step()
 
     tac = time.time()
     print("Time Taken : ", tac - tic)
 
     torch.save(model.state_dict(), "mnist.pt")
+
 
 if __name__ == "__main__":
     train()

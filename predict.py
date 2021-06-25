@@ -1,21 +1,15 @@
-from threading import main_thread
 import time
 import argparse
 
 import cv2
 import torch
-from torch import nn, Tensor
-from torch.nn.parameter import Parameter
 import torch.nn.functional as F
 from torchvision import transforms
-from tqdm import tqdm
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
-
+from colorama import Fore
 
 from model import mobilenet_v3_large
-from utils import calc_acc
-import dataset
 import config
 
 
@@ -35,29 +29,26 @@ def inference():
         num_classes = 100
 
     device = torch.device('cuda') if torch.cuda.is_available() and args.gpu else torch.device('cpu')
-    model = mobilenet_v3_large(num_classes=num_classes)
-    model = model.to(device)
-    model.eval()
+    model = mobilenet_v3_large(num_classes=num_classes).to(device)
     model.load_state_dict(torch.load(args.weights, map_location=device), strict=False)
+    model.eval()
 
     tic = time.time()
 
     transform = transforms.Compose([transforms.ToTensor(),
-                                     transforms.Resize((224,224))
+                                     transforms.Resize((config.input_size, config.input_size))
                                     #  transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                     #                       std=[0.229, 0.224, 0.225]),
                                     ])
     
     image = cv2.imread(args.input)
-
     image_tensor = transform(image).unsqueeze(0).to(device)
 
     output = F.softmax(model(image_tensor), dim=1)
-    print(config.GREEN, torch.argmax(output), config.RESET)
+    print(Fore.GREEN, torch.argmax(output), Fore.RESET)
 
     if args.use_gradcam:
         target_layer = model.features[-1]
-
         cam = GradCAM(model=model, target_layer=target_layer, use_cuda=args.gpu)
 
         input_tensor = image_tensor.float()
@@ -68,7 +59,6 @@ def inference():
         image_normal = image / 255.0
 
         visualization = show_cam_on_image(image_normal, grayscale_cam)
-
         cv2.imwrite(args.output, visualization)
 
     tac = time.time()

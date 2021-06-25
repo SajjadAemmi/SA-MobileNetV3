@@ -108,9 +108,7 @@ class InvertedResidualConfig:
 
 
 class InvertedResidual(nn.Module):
-
-    def __init__(self, cnf: InvertedResidualConfig, norm_layer: Callable[..., nn.Module],
-                 se_layer: Callable[..., nn.Module] = SqueezeExcitation):
+    def __init__(self, cnf: InvertedResidualConfig, norm_layer: Callable[..., nn.Module]):
         super().__init__()
         if not (1 <= cnf.stride <= 2):
             raise ValueError('illegal stride value')
@@ -149,15 +147,12 @@ class InvertedResidual(nn.Module):
 
 
 class MobileNetV3(nn.Module):
-
-    def __init__(
-            self,
-            inverted_residual_setting: List[InvertedResidualConfig],
-            last_channel: int,
-            num_classes: int = 1000,
-            block: Optional[Callable[..., nn.Module]] = None,
-            norm_layer: Optional[Callable[..., nn.Module]] = None
-    ) -> None:
+    def __init__(self,
+                 inverted_residual_setting: List[InvertedResidualConfig],
+                 last_channel: int,
+                 num_classes: int = 1000,
+                 block: Optional[Callable[..., nn.Module]] = None,
+                 norm_layer: Optional[Callable[..., nn.Module]] = None):
         """
         MobileNet V3 main class
         Args:

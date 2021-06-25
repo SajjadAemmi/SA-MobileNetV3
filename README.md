@@ -47,3 +47,10 @@ Run the following command for classification images:
 python predict.py --input /path/to/image.jpg 
 ```
 
+
+## Citation
+Please cite our paper if you find this repo useful in your research.
+```
+@article{
+}
+```
