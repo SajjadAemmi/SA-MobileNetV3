@@ -20,7 +20,7 @@ import config
 
 
 def inference():
-    parser = argparse.ArgumentParser(description='SA-MobileNetV3 - Inference')
+    parser = argparse.ArgumentParser(description='SA-MobileNetV3 - Predict')
     parser.add_argument('--input', help="input image", default='input/4.png', type=str)
     parser.add_argument('--output', help="output image", default='output/4.png', type=str)
     parser.add_argument('--dataset', help="dataset", default='mnist', type=str)
