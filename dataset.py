@@ -23,7 +23,9 @@ def mnist(subset='train'):
 
     if subset == 'train':
         train_dataset = datasets.MNIST('datasets', train=True, download=True, transform=transform)
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [50000, 10000])
+        train_size = int(0.8 * len(train_dataset))
+        val_size = len(train_dataset) - train_size
+        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
         train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
         val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
@@ -51,7 +53,9 @@ def cfar100(subset='train'):
 
     if subset == 'train':
         train_dataset = datasets.CIFAR100('datasets', train=True, download=True, transform=transform)
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [40000, 10000])
+        train_size = int(0.8 * len(train_dataset))
+        val_size = len(train_dataset) - train_size
+        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
         train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
         val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
@@ -79,7 +83,9 @@ def imagenet(subset='train'):
 
     if subset == 'train':
         train_dataset = datasets.ImageNet('datasets', split="train", download=True, transform=transform)
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [40000, 10000])
+        train_size = int(0.8 * len(train_dataset))
+        val_size = len(train_dataset) - train_size
+        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
         train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
         val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
