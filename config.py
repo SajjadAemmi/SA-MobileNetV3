@@ -1,9 +1,13 @@
 # hyper parameters
 
 batch_size = 64
+num_workers = 0
+input_size = 224
+
+# train
 epochs = 5
 lr = 0.001
 save_model = True
-num_workers = 0
 validation = True
-input_size = 224
+decay = 0.01
+step_size = 3
