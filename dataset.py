@@ -10,9 +10,6 @@ datasets_dir_path = 'datasets'
 
 def gray2rgb(image):
     return image.repeat(3, 1, 1)
-    # rgbimg = Image.new("RGB", image.size)
-    # rgbimg.paste(image)
-    # return rgbimg
 
 
 def load(name, subset='train', validation=False):
