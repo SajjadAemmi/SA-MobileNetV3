@@ -5,5 +5,5 @@ epochs = 5
 lr = 0.001
 save_model = True
 num_workers = 0
-val = True
+validation = True
 input_size = 224

@@ -17,11 +17,7 @@ def train():
     parser.add_argument('--gpu', help="gpu", default=False, action='store_true')
     args = parser.parse_args()
 
-    if args.dataset == 'mnist':
-        train_dataloader, val_dataloader, dataset_classes = dataset.mnist('train')
-    elif args.dataset == 'cfar100':
-        train_dataloader, val_dataloader, dataset_classes = dataset.cfar100('train')
-
+    train_dataloader, val_dataloader, dataset_classes = dataset.load(args.dataset, 'train', config.validation)
     num_classes = len(dataset_classes)
 
     device = torch.device('cuda') if torch.cuda.is_available() and args.gpu else torch.device('cpu')
@@ -31,7 +27,6 @@ def train():
 
     loss_fn = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
-
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     for epoch in range(1, config.epochs + 1):
@@ -58,7 +53,7 @@ def train():
               f"[lr: {optimizer.param_groups[0]['lr']}]",
               Fore.RESET)
 
-        if config.val:
+        if config.validation:
             model.eval()
             val_acc = 0
             with torch.no_grad():
@@ -77,7 +72,7 @@ def train():
     tac = time.time()
     print("Time Taken : ", tac - tic)
 
-    torch.save(model.state_dict(), "mnist.pt")
+    torch.save(model.state_dict(), "weights.pth")
 
 
 if __name__ == "__main__":

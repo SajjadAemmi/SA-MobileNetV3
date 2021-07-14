@@ -1,10 +1,12 @@
 from PIL import Image
 
 import torch
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms
 
 import config
 
+
+datasets_dir_path = 'datasets'
 
 def gray2rgb(image):
     return image.repeat(3, 1, 1)
@@ -13,92 +15,55 @@ def gray2rgb(image):
     # return rgbimg
 
 
-def mnist(subset='train'):
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Lambda(gray2rgb),
-                                    transforms.Resize((config.input_size, config.input_size)),
-                                    # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                    #                      std=[0.229, 0.224, 0.225]),
-                                ])
+def load(name, subset='train', validation=False):
+    if name == 'mnist':
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Lambda(gray2rgb),
+                                        transforms.Resize((config.input_size, config.input_size)),
+                                        ])
 
-    if subset == 'train':
-        train_dataset = datasets.MNIST('datasets', train=True, download=True, transform=transform)
-        train_size = int(0.8 * len(train_dataset))
-        val_size = len(train_dataset) - train_size
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
+        if subset == 'train':
+            dataset = datasets.MNIST(datasets_dir_path, train=True, download=True, transform=transform)
+        elif subset == 'test':
+            dataset = datasets.MNIST(datasets_dir_path, train=False, download=True, transform=transform)
+    
+    elif name == 'cfar10':
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.RandomHorizontalFlip(),
+                                        transforms.Resize((config.input_size, config.input_size))
+                                        ])
 
-        train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
+        if subset == 'train':
+            dataset = datasets.CIFAR10(datasets_dir_path, train=True, download=True, transform=transform)
+        elif subset == 'test':
+            dataset = datasets.CIFAR10(datasets_dir_path, train=False, download=True, transform=transform)
+
+    elif name == 'imagenet':
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.RandomHorizontalFlip(),
+                                        transforms.Resize((config.input_size, config.input_size))
+                                        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                        #                      std=[0.229, 0.224, 0.225]),
+                                        ])
+
+        if subset == 'train':
+            dataset = datasets.ImageNet(datasets_dir_path, split="train", download=True, transform=transform)
+        elif subset == 'test':
+            dataset = datasets.ImageNet(datasets_dir_path, split="val", download=True, transform=transform)
+
+    if validation:
+        train_dataset_size = int(0.8 * len(dataset))
+        val_dataset_size = len(dataset) - train_dataset_size
+        train_set, val_set = torch.utils.data.random_split(dataset, [train_dataset_size, val_dataset_size])
+        dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
         val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
+        print(train_dataset_size, val_dataset_size)
 
-        print('train', train_dataloader.dataset)
-        print('val', val_dataloader.dataset)
-        return train_dataloader, val_dataloader, train_dataset.classes
+        return dataloader, val_dataloader, dataset.classes
 
-    elif subset == 'test':
-        test_dataset = datasets.MNIST('datasets', train=False, download=True, transform=transform)
+    else:
+        dataloader = torch.utils.data.DataLoader(dataset, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
+        dataset_size = int(len(dataset))
+        print(dataset_size)
 
-        test_dataloader = torch.utils.data.DataLoader(test_dataset, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-
-        print('test', test_dataloader.dataset)
-        return test_dataloader, test_dataset.classes
-
-
-def cfar100(subset='train'):
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Resize((224,224)),
-                                    transforms.RandomHorizontalFlip()
-                                    # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                    #                      std=[0.229, 0.224, 0.225]),
-                                ])
-
-    if subset == 'train':
-        train_dataset = datasets.CIFAR100('datasets', train=True, download=True, transform=transform)
-        train_size = int(0.8 * len(train_dataset))
-        val_size = len(train_dataset) - train_size
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
-
-        train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-        val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-
-        print('train', train_dataloader.dataset)
-        print('val', val_dataloader.dataset)
-        return train_dataloader, val_dataloader, train_dataset.classes
-
-    elif subset == 'test':
-        test_dataset = datasets.CIFAR100('datasets', train=False, download=True, transform=transform)
-
-        test_dataloader = torch.utils.data.DataLoader(test_dataset, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-
-        print('test', test_dataloader.dataset)
-        return test_dataloader, test_dataset.classes
-
-
-def imagenet(subset='train'):
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Resize((224,224)),
-                                    transforms.RandomHorizontalFlip()
-                                    # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                    #                      std=[0.229, 0.224, 0.225]),
-                                ])
-
-    if subset == 'train':
-        train_dataset = datasets.ImageNet('datasets', split="train", download=True, transform=transform)
-        train_size = int(0.8 * len(train_dataset))
-        val_size = len(train_dataset) - train_size
-        train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
-
-        train_dataloader = torch.utils.data.DataLoader(train_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-        val_dataloader = torch.utils.data.DataLoader(val_set, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-
-        print('train', train_dataloader.dataset)
-        print('val', val_dataloader.dataset)
-        return train_dataloader, val_dataloader, train_dataset.classes
-
-    elif subset == 'test':
-        test_dataset = datasets.ImageNet('datasets', split="val", download=True, transform=transform)
-
-        test_dataloader = torch.utils.data.DataLoader(test_dataset, num_workers=config.num_workers, shuffle=True, batch_size=config.batch_size)
-
-        print('test', test_dataloader.dataset)
-        return test_dataloader, test_dataset.classes
-
+        return dataloader, dataset.classes
