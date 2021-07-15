@@ -1,3 +1,4 @@
+import os
 from PIL import Image
 
 import torch
@@ -35,7 +36,7 @@ def load(name, subset='train', validation=False):
         elif subset == 'test':
             dataset = datasets.CIFAR10(datasets_dir_path, train=False, download=True, transform=transform)
 
-    elif name == 'imagenet':
+    else:
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.RandomHorizontalFlip(),
                                         transforms.Resize((config.input_size, config.input_size))
@@ -44,9 +45,9 @@ def load(name, subset='train', validation=False):
                                         ])
 
         if subset == 'train':
-            dataset = datasets.ImageNet(datasets_dir_path, split="train", download=True, transform=transform)
+            dataset = datasets.ImageFolder(root=os.path.join(datasets_dir_path, name, 'train'), transform=transform)
         elif subset == 'test':
-            dataset = datasets.ImageNet(datasets_dir_path, split="val", download=True, transform=transform)
+            dataset = datasets.ImageFolder(root=os.path.join(datasets_dir_path, name, 'test'), transform=transform)
 
     if validation:
         train_dataset_size = int(0.8 * len(dataset))
