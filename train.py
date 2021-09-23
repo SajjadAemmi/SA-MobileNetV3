@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm
 from colorama import Fore
 
-from model import mobilenet_v3_large
+from models import mobilenet_v3_large, sa_resnet50
 from utils import calc_acc
 import dataset
 import config
@@ -14,7 +14,7 @@ import config
 def train():
     parser = argparse.ArgumentParser(description='SA-MobileNetV3 - Train')
     parser.add_argument('--dataset', help="dataset", default='mnist', type=str)
-    parser.add_argument('--gpu', help="gpu", default=False, action='store_true')
+    parser.add_argument('--gpu', help="gpu", default=True, action='store_true')
     args = parser.parse_args()
 
     train_dataloader, val_dataloader, dataset_classes = dataset.load(args.dataset, 'train', config.validation)

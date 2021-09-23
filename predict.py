@@ -9,7 +9,7 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from colorama import Fore
 
-from model import mobilenet_v3_large
+from models import mobilenet_v3_large, sa_resnet50
 import config
 
 

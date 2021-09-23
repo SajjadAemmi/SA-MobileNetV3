@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm
 from colorama import Fore
 
-from model import mobilenet_v3_large
+from models import mobilenet_v3_large, sa_resnet50
 from utils import calc_acc
 import dataset
 import config
