@@ -43,11 +43,11 @@ Run the following command for evaluation trained model on test dataset:
 python test.py --dataset mnist
 ```
 
-## Predict
+## Inference
 
 Run the following command for classification images:
 ```
-python predict.py --input /path/to/image.jpg 
+python inference.py --input /path/to/image.jpg 
 ```
 
 

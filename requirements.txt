@@ -3,5 +3,6 @@ torchvision
 numpy
 opencv-python
 grad-cam
+pytorch-gradcam
 ttach
 colorama

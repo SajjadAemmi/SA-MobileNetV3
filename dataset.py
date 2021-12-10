@@ -1,9 +1,6 @@
 import os
-from PIL import Image
-
 import torch
 from torchvision import datasets, transforms
-
 import config
 
 
