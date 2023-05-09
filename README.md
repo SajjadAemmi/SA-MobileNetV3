@@ -1,4 +1,7 @@
 # SA-MobileNetV3
+
+[![Python package](https://github.com/SajjadAemmi/SA-MobileNetV3/actions/workflows/python-package.yml/badge.svg)](https://github.com/SajjadAemmi/SA-MobileNetV3/actions/workflows/python-package.yml)
+
 Shuffle Attention for MobileNetV3
 
 ![model arch](assets/model_arch.png)
